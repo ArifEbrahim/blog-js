@@ -7,9 +7,13 @@ router.get("/new", (req, res) => {
   res.render("articles/new", { article });
 });
 
-router.get('/:id', (req, res) => {
-  
-})
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  const article = await Article.findById(id);
+  article == null
+    ? res.redirect("/")
+    : res.render("articles/show", { article });
+});
 
 router.post("/", async (req, res) => {
   const { title, description, markdown } = req.body;
