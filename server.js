@@ -1,6 +1,13 @@
 const express = require("express");
 const app = express();
 const articleRouter = require("./routes/articles");
+const mongoose = require("mongoose");
+require("dotenv").config();
+
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 app.set("view engine", "ejs");
 
