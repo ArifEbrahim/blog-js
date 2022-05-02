@@ -7,9 +7,9 @@ router.get("/new", (req, res) => {
   res.render("articles/new", { article });
 });
 
-router.get("/:id", async (req, res) => {
-  const { id } = req.params;
-  const article = await Article.findById(id);
+router.get("/:slug", async (req, res) => {
+  const { slug } = req.params;
+  const article = await Article.findOne({ slug });
   article == null
     ? res.redirect("/")
     : res.render("articles/show", { article });
@@ -25,7 +25,7 @@ router.post("/", async (req, res) => {
 
   try {
     const savedArticle = await article.save();
-    res.redirect(`/articles/${savedArticle.id}`);
+    res.redirect(`/articles/${savedArticle.slug}`);
   } catch (e) {
     res.render("articles/new", { article });
   }
