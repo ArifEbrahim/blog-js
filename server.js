@@ -3,6 +3,7 @@ const app = express();
 const articleRouter = require("./routes/articles");
 const mongoose = require("mongoose");
 require("dotenv").config();
+const Article = require("./models/article");
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
@@ -13,15 +14,9 @@ app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: false }));
 
-app.get("/", (req, res) => {
-  const articles = [
-    {
-      title: "Test article",
-      createdAt: new Date(),
-      description: "Test description",
-    },
-  ];
-  res.render("articles/index", { articles: articles });
+app.get("/", async (req, res) => {
+  const articles = await Article.find().sort({ createdAt: "desc" });
+  res.render("articles/index", { articles });
 });
 
 app.use("/articles", articleRouter);
