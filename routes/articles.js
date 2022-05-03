@@ -7,6 +7,12 @@ router.get("/new", (req, res) => {
   res.render("articles/new", { article });
 });
 
+router.get("/edit/:id", async (req, res) => {
+  const { id } = req.params;
+  const article = await Article.findById(id);
+  res.render("articles/new", { article });
+});
+
 router.get("/:slug", async (req, res) => {
   const { slug } = req.params;
   const article = await Article.findOne({ slug });
@@ -15,26 +21,46 @@ router.get("/:slug", async (req, res) => {
     : res.render("articles/show", { article });
 });
 
-router.post("/", async (req, res) => {
-  const { title, description, markdown } = req.body;
-  const article = new Article({
-    title,
-    description,
-    markdown,
-  });
+router.post(
+  "/",
+  async (req, res, next) => {
+    req.article = new Article();
+    next();
+  },
+  saveAndRedirect("new")
+);
 
-  try {
-    const savedArticle = await article.save();
-    res.redirect(`/articles/${savedArticle.slug}`);
-  } catch (e) {
-    res.render("articles/new", { article });
-  }
-});
+router.put(
+  "/:id",
+  async (req, res, next) => {
+    const { id } = req.params;
+    req.article = Article.findById(id);
+    next();
+  },
+  saveAndRedirect("edit")
+);
 
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   await Article.findByIdAndDelete(id);
   res.redirect("/");
 });
+
+function saveAndRedirect(path) {
+  return async (req, res) => {
+    const { title, description, markdown } = req.body;
+    let article = req.article;
+    article.title = title;
+    article.description = description;
+    article.markdown = markdown;
+
+    try {
+      const savedArticle = await article.save();
+      res.redirect(`/articles/${savedArticle.slug}`);
+    } catch (e) {
+      res.render(`articles/${path}`, { article });
+    }
+  };
+}
 
 module.exports = router;
